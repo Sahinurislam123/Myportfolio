@@ -1,94 +1,33 @@
-// Personalise the text and links in this file. Replace image files in /images for the public website.
-const PROFILE = {
-  name: "Sahinur Islam",
-  bio: "I love exploring ideas, learning new things, and turning inspiration into real projects. This is my corner of the internet — a place to share my journey, my work, and the things that make me who I am.",
-  email: "hello@example.com",
-  instagram: "https://instagram.com/",
-  facebook: "https://facebook.com/",
-  youtube: "https://youtube.com/",
-  whatsapp: "https://wa.me/91XXXXXXXXXX"
+// Edit this section to personalise your portfolio.
+const PROFILE={
+  name:'Sahinur Islam',
+  headline:'Creator & Designer',
+  tagline:'Building websites. Crafting new ideas. Creating apps.',
+  bio:'আমার নাম সেখ সাহিনুর ইসলাম। আমাকে ওয়েবসাইট বানাতে, নতুন নতুন ক্র্যাফট বানাতে, অ্যাপ বানাতে খুব ভালো লাগে।',
+  email:'',
+  instagram:'https://www.instagram.com/sksahinur.islam?xtok=MW5qNmQ0anZ0cDk2Yw==',
+  facebook:'',
+  whatsapp:''
 };
-
-document.querySelectorAll('[data-profile="name"]').forEach(el => el.textContent = PROFILE.name);
-document.querySelectorAll('[data-profile="bio"]').forEach(el => el.textContent = PROFILE.bio);
-document.querySelector('#emailLink').href = `mailto:${PROFILE.email}`;
-document.querySelectorAll('[data-social]').forEach(el => {
-  const url = PROFILE[el.dataset.social];
-  if (url) el.href = url;
+document.querySelector('#nameSmall').textContent=PROFILE.name.toUpperCase();
+document.querySelector('#headline').textContent=PROFILE.headline;
+document.querySelector('#tagline').textContent=PROFILE.tagline;
+document.querySelector('#bio').textContent=PROFILE.bio;
+if (PROFILE.email) document.querySelector('#email').href='mailto:'+PROFILE.email;
+else document.querySelector('#email').style.display='none';
+['instagram','facebook','whatsapp'].forEach(id=>{
+  const link=document.querySelector('#'+id);
+  if (PROFILE[id]) link.href=PROFILE[id];
+  else link.style.display='none';
 });
-document.querySelector('#year').textContent = new Date().getFullYear();
+document.querySelector('#year').textContent=new Date().getFullYear();
 
-// Hide placeholders only when the image file exists and loads successfully.
-function setupImage(img, placeholder) {
-  if (!img || !placeholder) return;
-  img.addEventListener('load', () => {
-    img.classList.add('loaded');
-    placeholder.style.display = 'none';
-  });
-  img.addEventListener('error', () => {
-    img.classList.remove('loaded');
-    placeholder.style.display = 'flex';
-  });
-  if (img.complete && img.naturalWidth > 0) {
-    img.classList.add('loaded');
-    placeholder.style.display = 'none';
-  }
-}
-setupImage(document.querySelector('#heroPhoto'), document.querySelector('#photoPlaceholder'));
-setupImage(document.querySelector('#coverPhoto'), document.querySelector('#coverPlaceholder'));
-document.querySelectorAll('.gallery-card').forEach(card => {
-  const img = card.querySelector('img');
-  const placeholder = card.querySelector('.gallery-placeholder');
-  setupImage(img, placeholder);
-});
-
-// Cinematic intro loader.
-document.body.classList.add('loading');
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.querySelector('#loader').classList.add('done');
-    document.body.classList.remove('loading');
-  }, 650);
-});
-setTimeout(() => {
-  document.querySelector('#loader')?.classList.add('done');
-  document.body.classList.remove('loading');
-}, 2400);
-
-// Reveal elements as they enter the viewport.
-const revealObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.12 });
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-// Small, restrained parallax on desktop only.
-const heroPhoto = document.querySelector('#heroPhoto');
-let rafPending = false;
-window.addEventListener('scroll', () => {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 761 || rafPending) return;
-  rafPending = true;
-  requestAnimationFrame(() => {
-    const y = Math.min(window.scrollY * 0.00018, 0.07);
-    if (heroPhoto) heroPhoto.style.transform = `scale(${1.08 + y}) translateY(${window.scrollY * 0.025}px)`;
-    rafPending = false;
-  });
-}, { passive: true });
-
-// Mobile navigation.
-const menuToggle = document.querySelector('#menuToggle');
-const mobileNav = document.querySelector('#mobileNav');
-menuToggle.addEventListener('click', () => {
-  const open = mobileNav.classList.toggle('open');
-  menuToggle.classList.toggle('active', open);
-  menuToggle.setAttribute('aria-expanded', String(open));
-});
-mobileNav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-  mobileNav.classList.remove('open');
-  menuToggle.classList.remove('active');
-  menuToggle.setAttribute('aria-expanded', 'false');
-}));
+const cards=[...document.querySelectorAll('.photo-card')];let active=2;let timer;
+function render(){const n=cards.length;cards.forEach((card,i)=>{let d=i-active;while(d>n/2)d-=n;while(d< -n/2)d+=n;const x=d*145;const z=-Math.abs(d)*90;const ry=d===0?0:d>0?-28:28;const scale=d===0?1:Math.max(.68,1-Math.abs(d)*.09);card.style.transform=`translateX(${x}px) translateZ(${z}px) rotateY(${ry}deg) scale(${scale})`;card.style.opacity=Math.abs(d)>3?'0':String(1-Math.abs(d)*.13);card.style.zIndex=String(10-Math.abs(d));card.style.filter=d===0?'saturate(1)':'saturate(.72)';});}
+function next(step){active=(active+step+cards.length)%cards.length;render();}
+document.querySelector('#prev').addEventListener('click',()=>{next(-1);restart();});
+document.querySelector('#next').addEventListener('click',()=>{next(1);restart();});
+function restart(){clearInterval(timer);timer=setInterval(()=>next(1),3500);}
+let startX=0;document.querySelector('.stage').addEventListener('touchstart',e=>startX=e.touches[0].clientX,{passive:true});
+document.querySelector('.stage').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>35){next(dx<0?1:-1);restart();}},{passive:true});
+render();restart();
